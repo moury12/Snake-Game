@@ -19,135 +19,218 @@ class _GameScreenState extends State<GameScreen> {
   int upperBoundY = 0;
   int lowerBoundY = 0;
   int step = 20;
-  int length =5;
-  double screenWidth=0.0;
-  double screenHeight=0.0;
-  List<Offset> positions =[];
-  Direction direction =Direction.right;
+  int length = 5;
+  double screenWidth = 0.0;
+  double screenHeight = 0.0;
+  List<Offset> positions = [];
+  Direction direction = Direction.right;
   Timer? timer;
+  Offset foodPosition = Offset.zero;
+  PieceWidget? food;
+  int score=0;
+  double speed =1.2;
   @override
   void initState() {
     restart();
     super.initState();
   }
-  void restart(){
-    if(timer!=null&& timer!.isActive){
+
+  void restart() {
+    length =5;
+    score =0;
+    speed =1;
+    positions=[];
+    direction =getRandomDirection();
+    if (timer != null && timer!.isActive) {
       timer!.cancel();
     }
-    timer =Timer.periodic(const Duration(milliseconds: 200), (timer) {
-      setState(() {
-
-      });
+    timer = Timer.periodic( Duration(milliseconds: 200~/speed), (timer) {
+      setState(() {});
     });
   }
-  int getNearestTens(int num){
-    int output= (num~/ step)*step;
-    if(output==0){
+bool detectionCollision(Offset position){
+    if(position.dx>=upperBoundX&& direction ==Direction.right){
+      return true;
+    }   if(position.dx>=lowerBoundX&& direction ==Direction.left){
+      return true;
+    }   if(position.dy>=upperBoundY&& direction ==Direction.down){
+      return true;
+    }   if(position.dy>=lowerBoundY&& direction ==Direction.up){
+      return true;
+    }
+    return false;
+}
+  void drawFood() {
+    if (food == null) {
+      foodPosition = getRandomPosition();
+      // Check if the food position coincides with the snake's head position
+      if (foodPosition == positions[0]) {
+        // Increment length, score, and speed
+        length++;
+        score += 5;
+        speed += 0.2;
+        // Update the food position to a new random position
+        foodPosition = getRandomPosition();
+      }
+      // Initialize the food widget
+      food = PieceWidget(
+        posX: foodPosition.dx.toInt(),
+        posY: foodPosition.dy.toInt(),
+        size: step,
+        color: Colors.red,
+      );
+    } else {
+      // Check if the food position coincides with the snake's head position
+      if (foodPosition == positions[0]) {
+        // Increment length, score, and speed
+        length++;
+        score += 5;
+        speed += 0.2;
+        // Update the food position to a new random position
+        foodPosition = getRandomPosition();
+      }
+      // Update the position of the existing food widget
+      food = PieceWidget(
+        posX: foodPosition.dx.toInt(),
+        posY: foodPosition.dy.toInt(),
+        size: step,
+        color: Colors.red,
+      );
+    }
+  }
+
+
+
+  int getNearestTens(int num) {
+    int output = (num ~/ step) * step;
+    if (output == 0) {
       output += step;
     }
     return output;
   }
-  void draw() {
-    if(positions.isEmpty){
+
+  void draw()async {
+    if (positions.isEmpty) {
       positions.add(getRandomPosition());
     }
-    while(length>positions.length){
-      positions.add(positions[positions.length-1]);
+    while (length > positions.length) {
+      positions.add(positions[positions.length - 1]);
     }
-    for(var i =positions.length-1; i>0; i--){
-      positions[i]==positions[i-1];
+    for (var i = positions.length - 1; i > 0; i--) {
+      positions[i] = positions[i - 1];
     }
-    positions [0] =getNextPosition(positions [0]);
+    positions[0] =await getNextPosition(positions[0]);
+    if (positions[0] == foodPosition) {
+      // Increment length, score, and speed
+      length++;
+      score += 5;
+      speed += 0.2;
+      // Update the food position to a new random position
+      foodPosition = getRandomPosition();
+    }
   }
-  Offset getNextPosition(Offset position) {
-    Offset nextPosition =Offset(position.dx+step, position.dy);
-    if(direction==Direction.right){
-      nextPosition =Offset(position.dx+step, position.dy);
-    }else if(direction==Direction.left){
-      nextPosition =Offset(position.dx-step, position.dy);
-    }else if(direction==Direction.up){
-      nextPosition =Offset(position.dx, position.dy-step);
-    }else if(direction==Direction.down){
-      nextPosition =Offset(position.dx, position.dy+step);
-    }
 
+  Future<Offset> getNextPosition(Offset position)async {
+    Offset nextPosition = Offset(position.dx + step, position.dy);
+    if (direction == Direction.right) {
+      nextPosition = Offset(position.dx + step, position.dy);
+    } else if (direction == Direction.left) {
+      nextPosition = Offset(position.dx - step, position.dy);
+    } else if (direction == Direction.up) {
+      nextPosition = Offset(position.dx, position.dy - step);
+    } else if (direction == Direction.down) {
+      nextPosition = Offset(position.dx, position.dy + step);
+    }
+if(detectionCollision(position)==true){
+  if (timer != null && timer!.isActive) {
+    timer!.cancel();
+  }
+ await Future.delayed(Duration(milliseconds: 200),() =>showGameOverDialog() ,);
+  return position;
+}
     return nextPosition;
   }
 
   Offset getRandomPosition() {
     Offset position;
-    int posX=Random().nextInt(upperBoundX)+lowerBoundX;
-    int posY =Random().nextInt(upperBoundY)+lowerBoundY;
-    position = Offset(getNearestTens(posX).toDouble(),getNearestTens(posY)
-        .toDouble() );
+    int posX = Random().nextInt(upperBoundX) + lowerBoundX;
+    int posY = Random().nextInt(upperBoundY) + lowerBoundY;
+    position = Offset(
+        getNearestTens(posX).toDouble(), getNearestTens(posY).toDouble());
     return position;
   }
 
-  List<PieceWidget> getPieces(){
-    final pieces =<PieceWidget>[];
+  List<PieceWidget> getPieces() {
+    final pieces = <PieceWidget>[];
     draw();
-  for(var i=0; i<length; i++){
-    pieces.add(PieceWidget(posX: positions[i].dx.toInt(), posY: positions[i]
-        .dy.toInt(),
-        size: step,
-        color: Colors.green));
-  }
+    drawFood();
+    for (var i = 0; i < length; i++) {
+      if(i>=positions.length){
+        continue;
+      }
+      pieces.add(PieceWidget(
+          posX: positions[i].dx.toInt(),
+          posY: positions[i].dy.toInt(),
+          size: step,
+          color: Colors.green));
+    }
     return pieces;
   }
+
   @override
   Widget build(BuildContext context) {
-    screenHeight =MediaQuery.of(context).size.height;
-    screenWidth =MediaQuery.of(context).size.width;
-    upperBoundX=getNearestTens(screenWidth.toInt()-step);
-    upperBoundY=getNearestTens(screenHeight.toInt()-step);
-    lowerBoundX=step;
-    lowerBoundY=step;
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
+    upperBoundX = getNearestTens(screenWidth.toInt() - step);
+    upperBoundY = getNearestTens(screenHeight.toInt() -  step - 150);
+    lowerBoundX = step;
+    lowerBoundY = step + MediaQuery.of(context).padding.bottom.toInt();
     return Scaffold(
       backgroundColor: Colors.yellow,
       body: Stack(
         children: [
           Stack(
             children: getPieces(),
-          )
+          ),
+          food??const SizedBox.shrink()
         ],
       ),
       bottomNavigationBar: SizedBox(
-        height: 200,
+        height: 150,
         child: Row(
           children: [
-            Expanded(child: Row(
+            Expanded(
+                child: Row(
               children: [
                 FloatingActionButton(
                   onPressed: () {
-                    direction =Direction.left;
+                    direction = Direction.left;
                   },
-                  child: Icon(Icons.arrow_left),
+                  child: const Icon(Icons.arrow_left),
                 ),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-
                     FloatingActionButton(
                       onPressed: () {
-                        direction =Direction.up;
-                        setState(() {
+                        direction = Direction.up;
 
-                        });
                       },
-                      child: Icon(Icons.arrow_drop_up_outlined),
-                    ), FloatingActionButton(
+                      child: const Icon(Icons.arrow_drop_up_outlined),
+                    ),
+                    FloatingActionButton(
                       onPressed: () {
-                        direction =Direction.down;
+                        direction = Direction.down;
                       },
-                      child: Icon(Icons.arrow_drop_down),
+                      child: const Icon(Icons.arrow_drop_down),
                     ),
                   ],
                 ),
                 FloatingActionButton(
                   onPressed: () {
-                    direction =Direction.right;
+                    direction = Direction.right;
                   },
-                  child: Icon(Icons.arrow_right),
+                  child: const Icon(Icons.arrow_right),
                 ),
               ],
             ))
@@ -157,7 +240,20 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+ void showGameOverDialog() {
+   showDialog(context: context, builder: (context) => AlertDialog(
+       actions: [
+     Text('Game is over'),
+     TextButton(onPressed: () {
+       Navigator.of(context).pop();
+       restart();
+     }, child: Text('restart'))
+   ]),) ;
+  }
 
-
+  Direction getRandomDirection() {
+    int val=Random().nextInt(4);
+    direction =Direction.values[val];
+    return direction;
+  }
 }
-
