@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:snake_game/pages/game_page.dart';
+import 'package:snake_game/pages/game_without_boundary_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
 
       ),
-      home: const GameScreen(),
+      home: const GameWithoutBoundaryScreen(),
     );
   }
 }
