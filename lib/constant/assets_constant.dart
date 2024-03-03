@@ -16,6 +16,7 @@ class AssetsConstant{
   static const String noButton ='assets/no.png';
   static const String ribbon ='assets/ribbon.png';
   static const String homeButton ='assets/home.png';
+  static const String dizzyIcon ='assets/dizzyIcon.png';
   static const String woodBackground ='assets/wood_background.png';
   static const String questionButton ='assets/question_button.png';
   static const String soundButton ='assets/sound_button.png';

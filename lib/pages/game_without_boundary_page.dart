@@ -4,9 +4,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:snake_game/constant/assets_constant.dart';
-import 'package:snake_game/pages/home_page.dart';
 
 import '../utils.dart';
+import 'widgets/grass_button_widget.dart';
 
 class GameWithoutBoundaryScreen extends StatefulWidget {
   const GameWithoutBoundaryScreen({super.key});
@@ -335,6 +335,10 @@ class _GameWithoutBoundaryScreenState extends State<GameWithoutBoundaryScreen> {
                                           ),
                                         )
                                       : const SizedBox.shrink(),
+                                /*  index == snakePos.last?Image.asset
+                                    (AssetsConstant.dizzyIcon,height: 100,)
+                                      :SizedBox
+                                      .shrink()*/
                                 ],
                               );
                             } else if (foodPos == index) {
@@ -526,7 +530,7 @@ class _GameWithoutBoundaryScreenState extends State<GameWithoutBoundaryScreen> {
                   )),
             ),
             Text(text ?? 'Game Over!',
-                style: TextStyle(
+                style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 30,
                     color: Color(0xff3c220c))),
