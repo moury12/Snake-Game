@@ -11,6 +11,10 @@ class AssetsConstant{
   static const String profileButton ='assets/profile.png';
   static const String pauseButton ='assets/pause_button.png';
   static const String playGameButton ='assets/play_button.png';
+  static const String restoreButton ='assets/restore.png';
+  static const String yesButton ='assets/yes.png';
+  static const String noButton ='assets/no.png';
+  static const String ribbon ='assets/ribbon.png';
   static const String homeButton ='assets/home.png';
   static const String woodBackground ='assets/wood_background.png';
   static const String questionButton ='assets/question_button.png';
